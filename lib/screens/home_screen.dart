@@ -4,7 +4,6 @@ import '../providers/hospital_provider.dart';
 import '../models/hospital.dart';
 import '../widgets/hospital_card.dart';
 import '../widgets/employee_bottom_sheet.dart';
-import 'hospital_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Provider otomatik olarak verileri yükleyecek
   }
 
   @override
@@ -40,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onHospitalTap(Hospital hospital) {
-    // İlk tıklama - çalışan sayısını göster
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -49,15 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _onHospitalDoubleTap(Hospital hospital) {
-    // İkinci tıklama - detay sayfasına git
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HospitalDetailScreen(hospital: hospital),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,19 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, '/add-hospital');
-            },
-            tooltip: 'Hastane Ekle',
-          ),
-        ],
       ),
       body: Column(
         children: [
-          // Arama çubuğu
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -122,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Hastane listesi
           Expanded(
             child: Consumer<HospitalProvider>(
               builder: (context, hospitalProvider, child) {
@@ -154,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            hospitalProvider._loadHospitals();
+                            hospitalProvider.reloadHospitals();
                           },
                           child: const Text('Tekrar Dene'),
                         ),
@@ -210,7 +187,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: HospitalCard(
                         hospital: hospital,
                         onTap: () => _onHospitalTap(hospital),
-                        onDoubleTap: () => _onHospitalDoubleTap(hospital),
                       ),
                     );
                   },

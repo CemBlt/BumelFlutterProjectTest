@@ -4,7 +4,9 @@ import '../providers/hospital_provider.dart';
 import '../models/hospital.dart';
 
 class AddHospitalScreen extends StatefulWidget {
-  const AddHospitalScreen({super.key});
+  final Hospital? hospitalToEdit;
+  
+  const AddHospitalScreen({super.key, this.hospitalToEdit});
 
   @override
   State<AddHospitalScreen> createState() => _AddHospitalScreenState();
@@ -24,6 +26,29 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
 
   final List<Employee> _employees = [];
   final List<Review> _reviews = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.hospitalToEdit != null) {
+      _loadHospitalData();
+    }
+  }
+
+  void _loadHospitalData() {
+    final hospital = widget.hospitalToEdit!;
+    _nameController.text = hospital.name;
+    _cityController.text = hospital.city;
+    _districtController.text = hospital.district;
+    _addressController.text = hospital.address;
+    _phoneController.text = hospital.phone;
+    _emailController.text = hospital.email;
+    _ratingController.text = hospital.rating.toString();
+    _latitudeController.text = hospital.latitude.toString();
+    _longitudeController.text = hospital.longitude.toString();
+    _employees.addAll(hospital.employees);
+    _reviews.addAll(hospital.reviews);
+  }
 
   @override
   void dispose() {
@@ -68,7 +93,7 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
   void _saveHospital() {
     if (_formKey.currentState!.validate()) {
       final hospital = Hospital(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.hospitalToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
         city: _cityController.text,
         district: _districtController.text,
@@ -82,14 +107,25 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
         email: _emailController.text,
       );
 
-      context.read<HospitalProvider>().addHospital(hospital);
+      if (widget.hospitalToEdit != null) {
+        context.read<HospitalProvider>().updateHospital(hospital);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hastane başarıyla güncellendi!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        context.read<HospitalProvider>().addHospital(hospital);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hastane başarıyla eklendi!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hastane başarıyla eklendi!'),
-          backgroundColor: Colors.green,
-        ),
-      );
     }
   }
 
@@ -97,7 +133,7 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hastane Ekle'),
+        title: Text(widget.hospitalToEdit != null ? 'Hastane Düzenle' : 'Hastane Ekle'),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
       ),
@@ -108,7 +144,6 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Temel bilgiler
               _buildSectionTitle('Temel Bilgiler'),
               _buildTextField(
                 controller: _nameController,
@@ -176,7 +211,6 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              // Konum bilgileri
               _buildSectionTitle('Konum Bilgileri'),
               Row(
                 children: [
@@ -198,7 +232,6 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              // Çalışanlar
               _buildSectionTitle('Çalışanlar'),
               if (_employees.isEmpty)
                 Container(
@@ -238,7 +271,7 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                         child: Text(employee.name[0]),
                       ),
                       title: Text(employee.name),
-                      subtitle: Text('${employee.role} - ${employee.specialization}'),
+                      subtitle: Text(employee.role),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
@@ -260,7 +293,6 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Yorumlar
               _buildSectionTitle('Yorumlar'),
               if (_reviews.isEmpty)
                 Container(
@@ -333,7 +365,6 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Kaydet butonu
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -346,9 +377,9 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Hastaneyi Kaydet',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  child: Text(
+                    widget.hospitalToEdit != null ? 'Değişiklikleri Kaydet' : 'Hastaneyi Kaydet',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -412,16 +443,12 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _roleController = TextEditingController();
-  final _specializationController = TextEditingController();
-  final _experienceController = TextEditingController();
   final _photoUrlController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
     _roleController.dispose();
-    _specializationController.dispose();
-    _experienceController.dispose();
     _photoUrlController.dispose();
     super.dispose();
   }
@@ -459,17 +486,6 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _specializationController,
-                decoration: const InputDecoration(labelText: 'Uzmanlık Alanı'),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _experienceController,
-                decoration: const InputDecoration(labelText: 'Deneyim Yılı'),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
                 controller: _photoUrlController,
                 decoration: const InputDecoration(labelText: 'Fotoğraf URL'),
               ),
@@ -489,8 +505,8 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 name: _nameController.text,
                 role: _roleController.text,
-                specialization: _specializationController.text,
-                experienceYears: int.tryParse(_experienceController.text) ?? 0,
+                specialization: '',
+                experienceYears: 0,
                 photoUrl: _photoUrlController.text,
               );
               widget.onSave(employee);
@@ -609,3 +625,4 @@ class _ReviewDialogState extends State<_ReviewDialog> {
     );
   }
 }
+

@@ -20,7 +20,6 @@ class EmployeeCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Fotoğraf
             Container(
               width: 80,
               height: 80,
@@ -50,12 +49,10 @@ class EmployeeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 16),
-            // Bilgiler
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // İsim ve rol
                   Row(
                     children: [
                       Expanded(
@@ -88,7 +85,6 @@ class EmployeeCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Uzmanlık alanı
                   if (employee.specialization.isNotEmpty) ...[
                     Row(
                       children: [
@@ -111,7 +107,6 @@ class EmployeeCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                   ],
-                  // Deneyim yılı
                   if (employee.experienceYears > 0) ...[
                     Row(
                       children: [
@@ -140,3 +135,4 @@ class EmployeeCard extends StatelessWidget {
     );
   }
 }
+

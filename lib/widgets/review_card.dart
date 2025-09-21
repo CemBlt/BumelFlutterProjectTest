@@ -21,10 +21,8 @@ class ReviewCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kullanıcı bilgileri ve puan
             Row(
               children: [
-                // Kullanıcı fotoğrafı
                 CircleAvatar(
                   radius: 20,
                   backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
@@ -40,7 +38,6 @@ class ReviewCard extends StatelessWidget {
                       : null,
                 ),
                 const SizedBox(width: 12),
-                // Kullanıcı adı ve tarih
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +60,6 @@ class ReviewCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Puan
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -96,7 +92,6 @@ class ReviewCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            // Yorum metni
             Text(
               review.comment,
               style: const TextStyle(
@@ -104,7 +99,6 @@ class ReviewCard extends StatelessWidget {
                 height: 1.4,
               ),
             ),
-            // Fotoğraflar
             if (review.photos.isNotEmpty) ...[
               const SizedBox(height: 12),
               SizedBox(
@@ -175,3 +169,4 @@ class ReviewCard extends StatelessWidget {
     return Colors.red;
   }
 }
+

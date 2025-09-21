@@ -12,7 +12,6 @@ class HospitalProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  // Örnek veriler - gerçek uygulamada API'den gelecek
   final List<Map<String, dynamic>> _sampleHospitals = [
     {
       'id': '1',
@@ -164,7 +163,6 @@ class HospitalProvider with ChangeNotifier {
         final List<dynamic> hospitalsList = json.decode(hospitalsJson);
         _hospitals = hospitalsList.map((json) => Hospital.fromJson(json)).toList();
       } else {
-        // İlk kez çalıştırıldığında örnek verileri yükle
         _hospitals = _sampleHospitals.map((json) => Hospital.fromJson(json)).toList();
         await _saveHospitals();
       }
@@ -227,4 +225,9 @@ class HospitalProvider with ChangeNotifier {
              hospital.district.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
+
+  Future<void> reloadHospitals() async {
+    await _loadHospitals();
+  }
 }
+

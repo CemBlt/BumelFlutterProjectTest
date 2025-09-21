@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/hospital.dart';
-import '../screens/hospital_detail_screen.dart';
-import 'employee_list_tile.dart';
+import 'appointment_booking_screen.dart';
 
 class EmployeeBottomSheet extends StatelessWidget {
   final Hospital hospital;
@@ -24,7 +23,6 @@ class EmployeeBottomSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle bar
           Container(
             margin: const EdgeInsets.only(top: 12),
             width: 40,
@@ -34,7 +32,6 @@ class EmployeeBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          // Header
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -81,7 +78,6 @@ class EmployeeBottomSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Çalışan sayısı kartı
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -128,7 +124,6 @@ class EmployeeBottomSheet extends StatelessWidget {
               ],
             ),
           ),
-          // Çalışan listesi
           if (hospital.employees.isNotEmpty) ...[
             const Divider(height: 1),
             Container(
@@ -141,39 +136,58 @@ class EmployeeBottomSheet extends StatelessWidget {
                 itemCount: hospital.employees.length,
                 itemBuilder: (context, index) {
                   final employee = hospital.employees[index];
-                  return EmployeeListTile(employee: employee);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: employee.photoUrl.isNotEmpty
+                              ? NetworkImage(employee.photoUrl)
+                              : null,
+                          child: employee.photoUrl.isEmpty
+                              ? const Icon(Icons.person)
+                              : null,
+                        ),
+                        title: Text(
+                          employee.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(employee.role),
+                          ],
+                        ),
+                        trailing: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AppointmentBookingScreen(
+                                  hospital: hospital,
+                                  employee: employee,
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: const Text('Randevu Al'),
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
           ],
-          // Detay butonu
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HospitalDetailScreen(hospital: hospital),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.info_outline),
-                label: const Text('Detayları Görüntüle'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
