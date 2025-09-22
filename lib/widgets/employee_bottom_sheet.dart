@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/hospital.dart';
-import 'appointment_booking_screen.dart';
+import '../screens/appointment_booking_screen.dart';
 
 class EmployeeBottomSheet extends StatelessWidget {
   final Hospital hospital;

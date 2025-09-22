@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bumelproject"
+    namespace = "com.example.dis_hastaneleri"
     compileSdk = flutter.compileSdkVersion
 
     ndkVersion = "27.0.12077973"
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.bumelproject"
+        applicationId = "com.example.dis_hastaneleri"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

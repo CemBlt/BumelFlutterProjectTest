@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/hospital_provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/appointment_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_hospital_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/my_appointments_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,8 +17,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => HospitalProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
+        ChangeNotifierProvider(create: (context) => HospitalProvider()),
+        ChangeNotifierProvider(create: (context) => AppointmentProvider()),
+      ],
       child: MaterialApp(
         title: 'Türkiye Diş Hastaneleri',
         theme: ThemeData(
@@ -28,9 +36,26 @@ class MyApp extends StatelessWidget {
             elevation: 0,
           ),
         ),
-        home: const HomeScreen(),
+        home: Consumer<AuthProvider>(
+          builder: (context, authProvider, child) {
+            if (authProvider.isLoading) {
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+            
+            if (authProvider.isLoggedIn) {
+              return const HomeScreen();
+            } else {
+              return const LoginScreen();
+            }
+          },
+        ),
         routes: {
           '/add-hospital': (context) => const AddHospitalScreen(),
+          '/login': (context) => const LoginScreen(),
         },
       ),
     );

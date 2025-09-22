@@ -24,6 +24,7 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
   final _latitudeController = TextEditingController();
   final _longitudeController = TextEditingController();
 
+
   final List<Employee> _employees = [];
   final List<Review> _reviews = [];
 
@@ -132,6 +133,7 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(widget.hospitalToEdit != null ? 'Hastane Düzenle' : 'Hastane Ekle'),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -466,6 +468,9 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Ad Soyad'),
+                textInputAction: TextInputAction.next,
+                enableSuggestions: true,
+                autocorrect: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Ad soyad gerekli';
@@ -477,6 +482,9 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
               TextFormField(
                 controller: _roleController,
                 decoration: const InputDecoration(labelText: 'Rol'),
+                textInputAction: TextInputAction.next,
+                enableSuggestions: true,
+                autocorrect: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Rol gerekli';
@@ -488,6 +496,9 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
               TextFormField(
                 controller: _photoUrlController,
                 decoration: const InputDecoration(labelText: 'Fotoğraf URL'),
+                textInputAction: TextInputAction.done,
+                enableSuggestions: false,
+                autocorrect: false,
               ),
             ],
           ),
@@ -557,6 +568,9 @@ class _ReviewDialogState extends State<_ReviewDialog> {
               TextFormField(
                 controller: _userNameController,
                 decoration: const InputDecoration(labelText: 'Kullanıcı Adı'),
+                textInputAction: TextInputAction.next,
+                enableSuggestions: true,
+                autocorrect: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Kullanıcı adı gerekli';
@@ -582,6 +596,9 @@ class _ReviewDialogState extends State<_ReviewDialog> {
                 controller: _commentController,
                 decoration: const InputDecoration(labelText: 'Yorum'),
                 maxLines: 3,
+                textInputAction: TextInputAction.next,
+                enableSuggestions: true,
+                autocorrect: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Yorum gerekli';
@@ -593,6 +610,9 @@ class _ReviewDialogState extends State<_ReviewDialog> {
               TextFormField(
                 controller: _photoUrlController,
                 decoration: const InputDecoration(labelText: 'Kullanıcı Fotoğraf URL'),
+                textInputAction: TextInputAction.done,
+                enableSuggestions: false,
+                autocorrect: false,
               ),
             ],
           ),

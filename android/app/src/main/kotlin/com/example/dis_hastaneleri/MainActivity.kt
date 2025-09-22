@@ -1,4 +1,4 @@
-package com.example.bumelproject
+package com.example.dis_hastaneleri
 
 import io.flutter.embedding.android.FlutterActivity
 
