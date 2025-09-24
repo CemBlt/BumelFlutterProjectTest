@@ -98,3 +98,4 @@ class Appointment {
   bool get isCompleted => status == 'completed';
   bool get isCancelled => status == 'cancelled';
 }
+
