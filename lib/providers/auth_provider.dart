@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/user.dart';
+import '../services/database_service.dart';
 
 class AuthProvider with ChangeNotifier {
   User? _currentUser;
@@ -22,6 +23,9 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      // Veritabanını başlat
+      await DatabaseService.initializeDatabase();
+      
       final prefs = await SharedPreferences.getInstance();
       final userJson = prefs.getString('current_user');
       
@@ -72,20 +76,33 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
+      // Veritabanında kullanıcı var mı kontrol et
+      final existingUser = await DatabaseService.getUserByEmail(email);
+      if (existingUser != null) {
+        _error = 'Bu e-posta adresi zaten kayıtlı';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+
       // Kullanıcı oluştur
       final user = User(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: '', // Veritabanı tarafından atanacak
         email: email,
+        password: password,
         name: name,
         phone: phone,
         createdAt: DateTime.now(),
       );
 
-      // Kullanıcıyı kaydet
+      // Veritabanına kaydet
+      final createdUser = await DatabaseService.createUser(user);
+
+      // Local storage'a da kaydet
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('current_user', json.encode(user.toJson()));
+      await prefs.setString('current_user', json.encode(createdUser.toJson()));
       
-      _currentUser = user;
+      _currentUser = createdUser;
       _error = null;
       _isLoading = false;
       notifyListeners();
@@ -115,21 +132,19 @@ class AuthProvider with ChangeNotifier {
         return false;
       }
 
-      // Kayıtlı kullanıcıları kontrol et
-      final prefs = await SharedPreferences.getInstance();
-      final userJson = prefs.getString('current_user');
+      // Veritabanından kullanıcıyı kontrol et
+      final user = await DatabaseService.getUserByEmail(email);
       
-      if (userJson != null) {
-        final userData = json.decode(userJson);
-        final user = User.fromJson(userData);
+      if (user != null && user.password == password) {
+        // Local storage'a da kaydet
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('current_user', json.encode(user.toJson()));
         
-        if (user.email == email) {
-          _currentUser = user;
-          _error = null;
-          _isLoading = false;
-          notifyListeners();
-          return true;
-        }
+        _currentUser = user;
+        _error = null;
+        _isLoading = false;
+        notifyListeners();
+        return true;
       }
 
       _error = 'E-posta veya şifre hatalı';

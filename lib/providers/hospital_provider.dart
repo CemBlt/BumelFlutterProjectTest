@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/hospital.dart';
+import '../services/database_service.dart';
 
 class HospitalProvider with ChangeNotifier {
   List<Hospital> _hospitals = [];
@@ -156,15 +157,16 @@ class HospitalProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final hospitalsJson = prefs.getString('hospitals');
+      // Veritabanından hastaneleri yükle
+      _hospitals = await DatabaseService.getAllHospitals();
       
-      if (hospitalsJson != null) {
-        final List<dynamic> hospitalsList = json.decode(hospitalsJson);
-        _hospitals = hospitalsList.map((json) => Hospital.fromJson(json)).toList();
-      } else {
-        _hospitals = _sampleHospitals.map((json) => Hospital.fromJson(json)).toList();
-        await _saveHospitals();
+      // Eğer veritabanında hastane yoksa örnek verileri ekle
+      if (_hospitals.isEmpty) {
+        for (final hospitalData in _sampleHospitals) {
+          final hospital = Hospital.fromJson(hospitalData);
+          await DatabaseService.createHospital(hospital);
+        }
+        _hospitals = await DatabaseService.getAllHospitals();
       }
       
       _error = null;
@@ -188,9 +190,14 @@ class HospitalProvider with ChangeNotifier {
   }
 
   Future<void> addHospital(Hospital hospital) async {
-    _hospitals.add(hospital);
-    await _saveHospitals();
-    notifyListeners();
+    try {
+      final createdHospital = await DatabaseService.createHospital(hospital);
+      _hospitals.add(createdHospital);
+      notifyListeners();
+    } catch (e) {
+      _error = 'Hastane eklenirken hata oluştu: $e';
+      notifyListeners();
+    }
   }
 
   Future<void> updateHospital(Hospital hospital) async {
@@ -203,12 +210,12 @@ class HospitalProvider with ChangeNotifier {
   }
 
   Future<void> deleteHospital(String hospitalId) async {
-    _hospitals.removeWhere((h) => h.id == hospitalId);
+    _hospitals.removeWhere((h) => h.id.toString() == hospitalId);
     await _saveHospitals();
     notifyListeners();
   }
 
-  Hospital? getHospitalById(String id) {
+  Hospital? getHospitalById(int id) {
     try {
       return _hospitals.firstWhere((h) => h.id == id);
     } catch (e) {
@@ -221,8 +228,7 @@ class HospitalProvider with ChangeNotifier {
     
     return _hospitals.where((hospital) {
       return hospital.name.toLowerCase().contains(query.toLowerCase()) ||
-             hospital.city.toLowerCase().contains(query.toLowerCase()) ||
-             hospital.district.toLowerCase().contains(query.toLowerCase());
+             hospital.address.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
 

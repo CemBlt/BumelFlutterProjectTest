@@ -20,13 +20,10 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _ratingController = TextEditingController();
-  final _latitudeController = TextEditingController();
-  final _longitudeController = TextEditingController();
-
+  final _descriptionController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   final List<Employee> _employees = [];
-  final List<Review> _reviews = [];
 
   @override
   void initState() {
@@ -42,13 +39,11 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
     _cityController.text = hospital.city;
     _districtController.text = hospital.district;
     _addressController.text = hospital.address;
-    _phoneController.text = hospital.phone;
-    _emailController.text = hospital.email;
-    _ratingController.text = hospital.rating.toString();
-    _latitudeController.text = hospital.latitude.toString();
-    _longitudeController.text = hospital.longitude.toString();
+    _phoneController.text = hospital.phone ?? '';
+    _emailController.text = hospital.email ?? '';
+    _descriptionController.text = hospital.description ?? '';
+    _imageUrlController.text = hospital.imageUrl ?? '';
     _employees.addAll(hospital.employees);
-    _reviews.addAll(hospital.reviews);
   }
 
   @override
@@ -59,9 +54,8 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
     _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _ratingController.dispose();
-    _latitudeController.dispose();
-    _longitudeController.dispose();
+    _descriptionController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -78,34 +72,23 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
     );
   }
 
-  void _addReview() {
-    showDialog(
-      context: context,
-      builder: (context) => _ReviewDialog(
-        onSave: (review) {
-          setState(() {
-            _reviews.add(review);
-          });
-        },
-      ),
-    );
-  }
 
   void _saveHospital() {
     if (_formKey.currentState!.validate()) {
       final hospital = Hospital(
-        id: widget.hospitalToEdit?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: widget.hospitalToEdit?.id ?? 0,
         name: _nameController.text,
         city: _cityController.text,
         district: _districtController.text,
-        rating: double.tryParse(_ratingController.text) ?? 0.0,
-        latitude: double.tryParse(_latitudeController.text) ?? 0.0,
-        longitude: double.tryParse(_longitudeController.text) ?? 0.0,
+        rating: null, // Puan kullanıcı yorumlarından hesaplanacak
         employees: _employees,
-        reviews: _reviews,
+        reviews: [], // Yorumlar ayrı ekranda eklenecek
         address: _addressController.text,
-        phone: _phoneController.text,
-        email: _emailController.text,
+        phone: _phoneController.text.isEmpty ? null : _phoneController.text,
+        email: _emailController.text.isEmpty ? null : _emailController.text,
+        description: _descriptionController.text.isEmpty ? null : _descriptionController.text,
+        imageUrl: _imageUrlController.text.isEmpty ? null : _imageUrlController.text,
+        createdAt: DateTime.now(),
       );
 
       if (widget.hospitalToEdit != null) {
@@ -199,39 +182,14 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                 keyboardType: TextInputType.emailAddress,
               ),
               _buildTextField(
-                controller: _ratingController,
-                label: 'Puan (0-5)',
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value != null && value.isNotEmpty) {
-                    final rating = double.tryParse(value);
-                    if (rating == null || rating < 0 || rating > 5) {
-                      return 'Puan 0-5 arasında olmalı';
-                    }
-                  }
-                  return null;
-                },
+                controller: _descriptionController,
+                label: 'Açıklama (Opsiyonel)',
+                maxLines: 3,
               ),
-              const SizedBox(height: 24),
-              _buildSectionTitle('Konum Bilgileri'),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _latitudeController,
-                      label: 'Enlem',
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildTextField(
-                      controller: _longitudeController,
-                      label: 'Boylam',
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
+              _buildTextField(
+                controller: _imageUrlController,
+                label: 'Resim URL (Opsiyonel)',
+                keyboardType: TextInputType.url,
               ),
               const SizedBox(height: 24),
               _buildSectionTitle('Çalışanlar'),
@@ -289,78 +247,6 @@ class _AddHospitalScreenState extends State<AddHospitalScreen> {
                 onPressed: _addEmployee,
                 icon: const Icon(Icons.person_add),
                 label: const Text('Çalışan Ekle'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionTitle('Yorumlar'),
-              if (_reviews.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.rate_review_outlined,
-                        size: 48,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Henüz yorum eklenmemiş',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                ..._reviews.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final review = entry.value;
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        child: Text(review.userName[0]),
-                      ),
-                      title: Text(review.userName),
-                      subtitle: Text(review.comment),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                            size: 16,
-                          ),
-                          Text(' ${review.rating}'),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              setState(() {
-                                _reviews.removeAt(index);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ElevatedButton.icon(
-                onPressed: _addReview,
-                icon: const Icon(Icons.add_comment),
-                label: const Text('Yorum Ekle'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
@@ -531,118 +417,4 @@ class _EmployeeDialogState extends State<_EmployeeDialog> {
   }
 }
 
-class _ReviewDialog extends StatefulWidget {
-  final Function(Review) onSave;
-
-  const _ReviewDialog({required this.onSave});
-
-  @override
-  State<_ReviewDialog> createState() => _ReviewDialogState();
-}
-
-class _ReviewDialogState extends State<_ReviewDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _userNameController = TextEditingController();
-  final _commentController = TextEditingController();
-  final _photoUrlController = TextEditingController();
-  double _rating = 5.0;
-
-  @override
-  void dispose() {
-    _userNameController.dispose();
-    _commentController.dispose();
-    _photoUrlController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Yorum Ekle'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: _userNameController,
-                decoration: const InputDecoration(labelText: 'Kullanıcı Adı'),
-                textInputAction: TextInputAction.next,
-                enableSuggestions: true,
-                autocorrect: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Kullanıcı adı gerekli';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              Text('Puan: ${_rating.toStringAsFixed(1)}'),
-              Slider(
-                value: _rating,
-                min: 1,
-                max: 5,
-                divisions: 8,
-                onChanged: (value) {
-                  setState(() {
-                    _rating = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _commentController,
-                decoration: const InputDecoration(labelText: 'Yorum'),
-                maxLines: 3,
-                textInputAction: TextInputAction.next,
-                enableSuggestions: true,
-                autocorrect: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Yorum gerekli';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _photoUrlController,
-                decoration: const InputDecoration(labelText: 'Kullanıcı Fotoğraf URL'),
-                textInputAction: TextInputAction.done,
-                enableSuggestions: false,
-                autocorrect: false,
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('İptal'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              final review = Review(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                userName: _userNameController.text,
-                userPhotoUrl: _photoUrlController.text,
-                rating: _rating,
-                comment: _commentController.text,
-                date: DateTime.now(),
-                photos: [],
-              );
-              widget.onSave(review);
-              Navigator.pop(context);
-            }
-          },
-          child: const Text('Ekle'),
-        ),
-      ],
-    );
-  }
-}
 

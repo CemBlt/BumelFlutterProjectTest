@@ -62,7 +62,7 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
 
     final success = await appointmentProvider.createAppointment(
       userId: authProvider.currentUser!.id,
-      hospitalId: widget.hospital.id,
+      hospitalId: widget.hospital.id.toString(),
       employeeId: widget.employee.id,
       appointmentDate: _selectedDate,
       timeSlot: _selectedTimeSlot!,

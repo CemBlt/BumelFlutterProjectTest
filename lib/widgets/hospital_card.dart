@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/hospital.dart';
 import '../providers/hospital_provider.dart';
 import '../screens/add_hospital_screen.dart';
+import '../screens/hospital_detail_screen.dart';
+import 'employee_bottom_sheet.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
@@ -20,7 +22,7 @@ class HospitalCard extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: onTap,
+        onTap: () => _navigateToDetail(context),
         onLongPress: () => _showDeleteOptions(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -42,31 +44,57 @@ class HospitalCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getRatingColor(hospital.rating),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          hospital.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                  hospital.rating != null
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getRatingColor(hospital.rating!),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star, color: Colors.white, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                hospital.rating!.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.star_border, color: Colors.grey[600], size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Henüz puan yok',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -111,13 +139,13 @@ class HospitalCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (hospital.phone.isNotEmpty)
+                  if (hospital.phone?.isNotEmpty == true)
                     Row(
                       children: [
                         Icon(Icons.phone, color: Colors.grey[600], size: 20),
                         const SizedBox(width: 4),
                         Text(
-                          hospital.phone,
+                          hospital.phone!,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 14,
@@ -140,6 +168,15 @@ class HospitalCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _navigateToDetail(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => EmployeeBottomSheet(hospital: hospital),
     );
   }
 
@@ -219,7 +256,7 @@ class HospitalCard extends StatelessWidget {
   void _deleteHospital(BuildContext context) async {
     try {
       final hospitalProvider = context.read<HospitalProvider>();
-      await hospitalProvider.deleteHospital(hospital.id);
+      await hospitalProvider.deleteHospital(hospital.id.toString());
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

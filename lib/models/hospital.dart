@@ -1,52 +1,58 @@
 class Hospital {
-  final String id;
+  final int id;
   final String name;
-  final String city;
-  final String district;
-  final double rating;
-  final double latitude;
-  final double longitude;
+  final String address;
+  final String? phone;
+  final String? email;
+  final String? website;
+  final String? description;
+  final double? rating; // Nullable yapıldı - hiç yorum yoksa null
+  final String? imageUrl;
+  final DateTime createdAt;
   final List<Employee> employees;
   final List<Review> reviews;
-  final String address;
-  final String phone;
-  final String email;
+  final String city;
+  final String district;
 
   Hospital({
     required this.id,
     required this.name,
+    required this.address,
+    this.phone,
+    this.email,
+    this.website,
+    this.description,
+    this.rating, // Artık nullable
+    this.imageUrl,
+    required this.createdAt,
+    this.employees = const [],
+    this.reviews = const [],
     required this.city,
     required this.district,
-    required this.rating,
-    required this.latitude,
-    required this.longitude,
-    required this.employees,
-    required this.reviews,
-    required this.address,
-    required this.phone,
-    required this.email,
   });
 
-  String get location => '$city / $district';
+  String get location => address;
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
     return Hospital(
-      id: json['id'] ?? '',
+      id: json['id'] ?? 0,
       name: json['name'] ?? '',
-      city: json['city'] ?? '',
-      district: json['district'] ?? '',
-      rating: (json['rating'] ?? 0.0).toDouble(),
-      latitude: (json['latitude'] ?? 0.0).toDouble(),
-      longitude: (json['longitude'] ?? 0.0).toDouble(),
+      address: json['address'] ?? '',
+      phone: json['phone'],
+      email: json['email'],
+      website: json['website'],
+      description: json['description'],
+      rating: json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+      imageUrl: json['imageUrl'],
+      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       employees: (json['employees'] as List<dynamic>?)
           ?.map((e) => Employee.fromJson(e))
           .toList() ?? [],
       reviews: (json['reviews'] as List<dynamic>?)
           ?.map((e) => Review.fromJson(e))
           .toList() ?? [],
-      address: json['address'] ?? '',
-      phone: json['phone'] ?? '',
-      email: json['email'] ?? '',
+      city: json['city'] ?? '',
+      district: json['district'] ?? '',
     );
   }
 
@@ -54,16 +60,18 @@ class Hospital {
     return {
       'id': id,
       'name': name,
-      'city': city,
-      'district': district,
-      'rating': rating,
-      'latitude': latitude,
-      'longitude': longitude,
-      'employees': employees.map((e) => e.toJson()).toList(),
-      'reviews': reviews.map((e) => e.toJson()).toList(),
       'address': address,
       'phone': phone,
       'email': email,
+      'website': website,
+      'description': description,
+      'rating': rating,
+      'imageUrl': imageUrl,
+      'createdAt': createdAt.toIso8601String(),
+      'employees': employees.map((e) => e.toJson()).toList(),
+      'reviews': reviews.map((e) => e.toJson()).toList(),
+      'city': city,
+      'district': district,
     };
   }
 }

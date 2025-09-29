@@ -116,12 +116,15 @@ class AppointmentProvider with ChangeNotifier {
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: userId,
         hospitalId: hospitalId,
+        doctorName: '', // Bu alan daha sonra doldurulacak
         employeeId: employeeId,
         appointmentDate: appointmentDate,
+        appointmentTime: timeSlot,
         timeSlot: timeSlot,
         status: 'active',
         notes: notes,
         createdAt: DateTime.now(),
+        hospitalName: '', // Bu alan daha sonra doldurulacak
       );
 
       _appointments.add(appointment);

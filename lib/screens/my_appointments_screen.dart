@@ -161,21 +161,21 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                           if (appointment.isActive)
                             IconButton(
                               icon: const Icon(Icons.cancel, color: Colors.red),
-                              onPressed: () => _cancelAppointment(appointment.id),
+                              onPressed: () => _cancelAppointment(appointment.id.toString()),
                               tooltip: 'Randevuyu İptal Et',
                             ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Dr. ${appointment.employee?.name ?? 'Bilinmeyen'}',
+                        'Dr. ${appointment.doctorName}',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        appointment.hospital?.name ?? 'Bilinmeyen Hastane',
+                        appointment.hospitalName,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -193,12 +193,12 @@ class _MyAppointmentsScreenState extends State<MyAppointmentsScreen> {
                           Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                           const SizedBox(width: 4),
                           Text(
-                            appointment.timeSlot,
+                            appointment.appointmentTime,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
                       ),
-                      if (appointment.notes.isNotEmpty) ...[
+                      if (appointment.notes?.isNotEmpty == true) ...[
                         const SizedBox(height: 8),
                         Text(
                           'Notlar: ${appointment.notes}',
